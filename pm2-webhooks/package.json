@@ -1,0 +1,31 @@
+{
+  "name": "pm2-webhooks",
+  "version": "1.0.0",
+  "description": "PM2 Webhooks",
+  "main": "app.js",
+  "dependencies": {
+    "pm2": "^3.5.0",
+    "pmx": "beta"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zyyou/pm2-modules"
+  },
+  "config": {
+    "interval_check":5000,
+    "interval_push":5000,
+    "merge_size":10,
+    "enabled":true
+  },
+  "apps": [
+    {
+      "autorestart": true,
+      "exec_mode":"fork",
+      "merge_logs": true,
+      "max_memory_restart": "1G",
+      "script": "app.js"
+    }
+  ],
+  "author": "zyy",
+  "license": "MIT"
+}
