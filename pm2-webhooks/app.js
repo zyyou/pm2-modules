@@ -85,7 +85,7 @@ pmx.initModule({
     }
 
     if (!opts.enabled) {
-      console.warn('pm2-webhooks已停用，如需启用请执行：pm2 set pm2-webhooks:enabled true');
+      console.warn(`${opts.module_name}已停用，如需启用请执行：pm2 set ${opts.module_name}:enabled true`);
       return;
     }
 
