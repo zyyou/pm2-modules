@@ -1,9 +1,10 @@
 {
   "name": "pm2-webhooks",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "PM2 Webhooks",
   "main": "app.js",
   "dependencies": {
+    "https-sync": "^1.1.1",
     "pm2": "^3.5.1",
     "pmx": "beta"
   },

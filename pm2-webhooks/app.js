@@ -3,14 +3,16 @@
 const pm2 = require('pm2');
 const pmx = require('pmx');
 const os = require('os');
+const http = require('https-sync');
 
-let processList = {};
-let messages = [];  //at,pname,pid,data
-let moduleConfig = {};
+let processList = {}; //进程配置列表
+let messages = []; //消息缓冲区 at,pname,pid,data
+let moduleConfig = {}; //模块配置
 
+//应用入口
 pmx.initModule({
 
-  // Options related to the display style on Keymetrics
+  // Keymetrics相关样式配置
   widget: {
 
     // Logo displayed
@@ -43,16 +45,19 @@ pmx.initModule({
 
 }, (a, opts) => {
 
+  //进程监测频率
   if (isNaN(opts.interval_check) || opts.interval_check < 10) {
     opts.interval_check = 5000;
   }
 
+  //推送频率
   if (isNaN(opts.interval_push) || opts.interval_push < 1000) {
-    opts.interval_check = 5000;
+    opts.interval_push = 5000;
   }
 
+  //批处理消息数（从消息缓冲区shift数，非合并消息）
   if (isNaN(opts.merge_size)) {
-    opts.interval_check = 5;
+    opts.merge_size = 5;
   }
 
   moduleConfig = opts;
@@ -72,7 +77,7 @@ pmx.initModule({
     }
   });
 
-  //定时检查进程
+  //定时任务 检查进程、推送消息
   pm2.connect((err) => {
     if (err) {
       console.error('error', err)
@@ -107,42 +112,42 @@ pmx.initModule({
     bus.on('log:out', function (data) {
       let cfg = processList[data.process.name];
       if (cfg && cfg.log_out) {
-        addMessage(data);
+        addMessage(data, 'out');
       }
     });
 
     bus.on('log:err', function (data) {
       let cfg = processList[data.process.name];
       if (cfg && cfg.log_error) {
-        addMessage(data);
+        addMessage(data, 'err');
       }
     });
 
     bus.on('log:kill', function (data) {
       let cfg = processList[data.process.name];
       if (cfg && cfg.log_kill) {
-        addMessage(data);
+        addMessage(data, 'kill');
       }
     });
 
     bus.on('process:exception', function (data) {
       let cfg = processList[data.process.name];
       if (cfg && cfg.process_exception) {
-        addMessage(data);
+        addMessage(data, 'exception');
       }
     });
 
     bus.on('process:event', function (data) {
       let cfg = processList[data.process.name];
       if (cfg && cfg.process_event) {
-        addMessage(data);
+        addMessage(data, 'event');
       }
     });
 
     bus.on('process:msg', function (data) {
       let cfg = processList[data.process.name];
       if (cfg && cfg.process_msg) {
-        addMessage(data);
+        addMessage(data, 'msg');
       }
     });
 
@@ -151,15 +156,16 @@ pmx.initModule({
 
   });
 
+  //模块重启
   pm2.reloadLogs(function (err, result) {
-    console.log('reload', err, result);
+    console.log('模块reload', err, result);
   })
 
 });
 
 
 /**
- * 更新进程webhook注册数
+ * 更新进程webhook注册数以及进程配置
  *
  * @param {*} a
  * @param {*} procs
@@ -171,31 +177,44 @@ function updateProcess(a, procs) {
       continue;
     }
 
+    //配置项
     processList[proc.name] = {
-      log_out: proc.pm2_env.webhook_log_out,
-      log_error: proc.pm2_env.webhook_log_error,
-      log_kill: proc.pm2_env.webhook_log_kill,
-      process_exception: proc.pm2_env.webhook_process_exception,
-      process_event: proc.pm2_env.webhook_process_event,
-      process_msg: proc.pm2_env.webhook_process_msg,
-      mobiles: proc.pm2_env.webhook_mobiles,
-      url: proc.pm2_env.webhook_url
+      log_out: proc.pm2_env.webhook_log_out, //普通消息
+      log_error: proc.pm2_env.webhook_log_error, //error消息
+      log_kill: proc.pm2_env.webhook_log_kill, //进程结束
+      process_exception: proc.pm2_env.webhook_process_exception, //进程异常
+      process_event: proc.pm2_env.webhook_process_event, //进程事件
+      process_msg: proc.pm2_env.webhook_process_msg, //进程消息
+      mobiles: proc.pm2_env.webhook_mobiles || '', //@手机号
+      url: proc.pm2_env.webhook_url || '', //webhook地址
+      type: proc.pm2_env.webhook_type || '' //webhook类型：dingtalk、weixin
     };
 
     //console.log('processList:', processList);
   }
 }
 
-function addMessage(data) {
+/**
+ * 向消息缓冲器写入消息
+ *
+ * @param {*} data  消息对象
+ * @param {*} type  消息类型（out err等）
+ */
+function addMessage(data, type) {
   messages.push({
     pname: data.process.name,
     pid: data.process.pm_id,
+    type: type,
     data: data.event || data.exception || data.data
   });
 }
 
-
-function webhookPush() {
+/**
+ * 推送到webhook地址
+ *
+ * @returns
+ */
+async function webhookPush() {
   let data = {};
   for (let i = 0; i < moduleConfig.merge_size; i++) {
     let msg = messages.shift();
@@ -205,7 +224,7 @@ function webhookPush() {
     if (!data[msg.pname]) {
       data[msg.pname] = '';
     }
-    data[msg.pname] += `${msg.pname}(${msg.pid}) ${msg.data} \r\n`;
+    data[msg.pname] += `${msg.pname}(${msg.pid}) ${msg.type} ${msg.data} \r\n`;
   }
 
   let keys = Object.keys(data);
@@ -213,55 +232,72 @@ function webhookPush() {
     return;
   }
 
-  for (let key of keys) {
-    sendToDingtalk(key, data[key]);
+  let url;
+  try {
+    for (let key of keys) {
+
+      let cfg = processList[key];
+      if (!cfg) {
+        continue;
+      }
+      cfg.mobiles = cfg.mobiles || '';
+
+      let webhookData;
+      switch (cfg.type) {
+        case 'dingtalk':
+          webhookData = buildDingtalkData(cfg, `[${os.hostname()}] ${data[key]}`);
+          break;
+        case 'weixin':
+          webhookData = buildWeixinData(cfg, `[${os.hostname()}] ${data[key]}`);
+          break;
+        default:
+          console.error('webhook_type无效：', cfg);
+          continue;
+      }
+
+      url = cfg.url; //用于异常后打印日志
+      http.postJSON(url, webhookData);
+    }
+  } catch (error) {
+    console.error('post发送异常:', url, error);
   }
 }
 
 /**
- * 发送到钉钉
+ * 构造钉钉消息体
  *
- * @param {*} pname
+ * @param {*} cfg webhook配置
  * @param {*} message
  * @returns
  */
-function sendToDingtalk(pname, message) {
-  let cfg = processList[pname];
-  if (!cfg) {
-    return;
-  }
-
-  cfg.mobiles = cfg.mobiles || [];
-
-  let data = {
+function buildDingtalkData(cfg, message) {
+  return {
     "msgtype": "text",
     "text": {
-      "content": `[${os.hostname()}] ${message}`
+      "content": message
     },
     "at": {
       "atMobiles": cfg.mobiles.split(','),
       "isAtAll": false
     }
   };
+}
 
-  let http = cfg.url.startsWith('https://') ? require('https') : require('http');
 
-  try {
-    let req = http.request(cfg.url, {
-      headers: {
-        'Content-Type': 'application/json;charset=utf-8'
-      },
-      method: 'POST',
-      timeout: 60000
-    });
-
-    req.on('error', (e) => {
-      console.error(`钉钉请求失败: ${e.message}`);
-    });
-
-    req.write(JSON.stringify(data));
-    req.end();
-  } catch (error) {
-    console.error(`钉钉请求异常: ${error.message}`);
-  }
+/**
+ * 构造微信消息体
+ *
+ * @param {*} cfg webhook配置
+ * @param {*} message
+ * @returns
+ */
+function buildWeixinData(cfg, message) {
+  return {
+    msgtype: 'text',
+    text: {
+      content: message.length > 2000 ? '**截取前2000字符**' + message.substr(0, 2000) : message,
+      mentioned_list: [],
+      mentioned_mobile_list: cfg.mobiles.split(',')
+    }
+  };
 }
