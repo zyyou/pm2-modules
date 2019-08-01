@@ -1,30 +1,20 @@
 
 var pmx = require('pmx');
 
-/******************************
- *    ______ _______ ______
- *   |   __ \   |   |__    |
- *   |    __/       |    __|
- *   |___|  |__|_|__|______|
- *
- *      PM2 Module Sample
- *
- ******************************/
-
 /**
  *    Module system documentation
  *       http://bit.ly/1hnpcgu
  *
- *   Start module in development mode
+ *   开发模式安装模块(注意后面的.)
  *          $ cd to my-module
  *          $ pm2 install .
  *
- *  Official modules are published here
+ *  官方模块
  *      https://github.com/pm2-hive
  */
 
 /**
- *           Module Entry Point
+ *           模块入口点
  *
  *  We first initialize the module by calling
  *         pmx.initModule({}, cb);
