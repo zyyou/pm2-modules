@@ -1,0 +1,403 @@
+/*页面容器*/
+body[data-role] {
+	margin: 8px;
+	padding: 0;
+	font-size:12px;
+	color: #333333;
+}
+
+
+/*button */
+body[data-role] button{
+	white-space: nowrap;
+	vertical-align: middle;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none; /*点击阴影*/
+	cursor:pointer;
+	background-image: none;
+	border:none;
+	background: inherit;
+	outline: none;
+}
+/* 对齐方式 居左 */
+body[data-role] [data-align="left"]{
+	text-align: left;
+}
+/* 对齐方式 居中 */
+body[data-role] [data-align="center"]{
+	text-align: center;
+}
+/* 对齐方式 右对齐*/
+body[data-role] [data-align="right"]{
+	text-align: right;
+}
+
+
+/* 表单单独一行显示 */
+form[data-role] div[data-display=block]{
+	display: block;
+}
+
+/* 表单容器 */
+form[data-role] {
+	height: auto;
+	overflow: hidden;
+}
+
+/* 表单元素 */
+form[data-role] input[type=checkbox],
+form[data-role] input[type=radio] {
+	width: 12px;
+	height: 12px;
+	background:#fff;
+
+}
+
+/* 表单 基础样式input */
+form[data-role] input {
+	width: 160px;
+	height: 30px;
+	padding: 0 5px;
+	border: 1px solid #d8d8d8;
+	background: #fff;
+	outline: none;
+	/* -webkit-appearance: none; */
+}
+/* 表单 基础样式select */
+form[data-role] select {
+	width: 172px;
+	height: 32px;
+	padding: 6px 5px;
+	appearance: none;
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	border: 1px solid #d8d8d8;
+	background: #fff url("../image/select-down.png") no-repeat 149px 7px;
+	color:#333333;
+	outline: none;
+}
+/* 表单 基础样式select IE专用 */
+form[data-role] select::-ms-expand{ display: none; }
+
+
+/* 表单 button*/
+form[data-role] button{
+	display: inline-block;
+	min-width: 80px;
+	padding: 6px 12px;
+	margin: 0 5px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	color: #333;
+	background-color: #fff;
+}
+/* 表单 [data-role=loginbox] 高亮*/
+form[data-role] [data-active=true],[data-role=error] a[data-active=true]{
+	color:#fff;
+	background-color:#0082C0;
+	border-color:#0082C0;
+}
+
+/* 表单  默认一行显示 */
+form[data-role] div{
+	display: inline-block;
+	visibility: top;
+	width: auto;
+	padding: 10px 10px 10px 0;
+	display: block\9;
+	float:left\9;
+}
+
+/* 表单 label样式 八个字最多 */
+form[data-role] label {
+	display: block;
+	float: left;
+	width: 125px;
+	height: 32px;
+	padding-right: 8px;
+	line-height: 32px;
+	text-align: right;
+	overflow: hidden;
+}
+
+/* 表单  单个dataTime */
+form[data-role] [data-datetime="datetime"]{
+	background: #fff url("../plugin/time/time_logo.png") no-repeat 145px 7px;
+}
+
+/* 表单  区间dataTime */
+form[data-role] [data-datetime="areatime"]{
+	width: 320px;
+	background: #fff url("../plugin/time/time_logo.png") no-repeat 305px 7px;
+}
+/* 表单  省市县下拉菜单 */
+form[data-role] [data-select="county"] select{
+	width: 93px;
+	margin-left: 6px;
+	background: #fff url("../image/select-down.png") no-repeat 70px 7px;
+}
+
+
+/* 表格 */
+form[data-role=grid] {}
+
+/* 表格 功能按钮a  a*/
+form[data-role=grid] a,[data-role=error] a{
+	display: inline-block;
+	min-width: 78px;
+	padding:6px 0;
+    margin: 0 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: #333;
+	background-color: #fff;
+	text-decoration: none;
+	text-align: center;
+	vertical-align: top;
+	cursor: pointer;
+}
+
+/* 表格 table 按钮  a*/
+form[data-role=grid]>table a{
+	display: inline-block;
+	text-decoration: none;
+	color:#06C;
+	min-width:auto;
+	border: none;
+	background: inherit;
+	padding:0;
+}
+
+/* 表格 table */
+form[data-role=grid]>table {
+	border-spacing: 0;
+	border-collapse: collapse;
+	background: #fff;
+	width: 100%;
+	box-sizing: border-box;
+	border:1px solid #d8d8d8;
+}
+
+/* 表格 td */
+form[data-role=grid]>table td {
+	text-align: center;
+	border: 1px solid #E1E6EB;
+	padding: 8px 5px;
+}
+
+/* 表格 表头td */
+form[data-role=grid]>table thead td {
+	background: #F5F6FA;
+	color:#999;
+}
+
+/* 表格 各行换色 */
+form[data-role=grid]>table tbody tr:nth-child(2n){
+	background: #f9f9fa;
+}
+/* 表格 鼠标滑过 */
+form[data-role=grid]>table tbody tr:hover{
+	background: #f9f1f1;
+}
+
+/* 分页 */
+form[data-role=grid]>div[data-role=pager] {
+	width: 100%;
+	text-align: center;
+}
+
+
+/* 分页 [data-role=loginbox] */
+form[data-role=grid]>div[data-role=pager]>[data-role=loginbox] {
+	min-width: auto;
+	padding:0;
+	border: none;
+	background: inherit;
+	line-height: 26px;
+	margin: -2px 2px 0 2px;
+	color:#000;
+}
+/* 分页 span */
+form[data-role=grid]>div[data-role=pager]>span {
+	margin: 0 2px;
+	display: inline-block;
+	cursor: pointer;
+}
+
+/* 分页 select */
+form[data-role=grid]>div[data-role=pager]>select {
+	border: 1px solid #cccccc;
+	width: 55px;
+	height: 25px;
+	margin: 0px 6px;
+	padding:4px 0 6px 6px;
+	background: #fff url("../image/select-down.png") no-repeat 32px 3px;
+}
+
+/* 分页 input */
+form[data-role=grid]>div[data-role=pager]>input {
+	border: 1px solid #cccccc;
+	width: 48px;
+	height: 22px;
+	margin: 0px 6px;
+	padding-left: 8px;
+}
+
+
+
+/* message */
+div[data-role=dialog] {
+	background: #fdf9e4;
+	border:1px solid #fbeed2;
+	padding: 5px 8px;
+	width: 97%;
+	min-width: 320px;
+	position: fixed;
+	top: 0;
+	left: 0;
+	color: #a38a62;
+	overflow: hidden;
+}
+	[data-role=dialog] div{
+		width: 70%;
+		overflow: hidden;
+		display:block;
+		float: left;
+		text-align: center;
+		white-space: nowrap;
+		text-overflow:ellipsis;
+	}
+	[data-role=dialog] ul{
+		display:block;
+		float: right;
+		width: 20%;
+		margin-right: 15px;
+		margin-block-start: 0em;
+		margin-block-end: 0em;
+		margin-inline-start: 0px;
+		margin-inline-end: 0px;
+		padding-inline-start: 0px;
+		-webkit-margin-before: 0em;
+		-webkit-margin-after: 0em;
+		-webkit-margin-start: 0px;
+		-webkit-margin-end: 0px;
+		-webkit-padding-start: 0px;
+	}
+	[data-role=dialog] ul li{
+		display: block;
+		float: right;
+		margin:0 5px;
+		cursor: pointer;
+		list-style: none;
+		color:#4488d0;
+	}
+
+/* error */
+[data-role=error]{
+}
+	[data-role=error] p{
+		line-height: 20px;
+	}
+	
+/* homebody 布局 */
+[data-role=layout]{
+	height: auto;
+	margin: 5px auto;
+	overflow: hidden;
+	text-align:justify;
+	text-align-last:justify;
+}
+
+
+/* 四级菜单 */
+[data-menu=page]{
+	height: 38px;
+	margin-top:8px;
+	border-bottom: 1px solid #d7d7d7;
+}
+	[data-menu=page] [data-page=item]{
+		display: block;
+		float:left;
+		text-align: center;
+		cursor: pointer;
+		padding: 10px 15px;
+		margin-right: -1px;
+		background: #fff;
+		border-top: 1px solid #DDD;
+		border-left: 1px solid #DDD;
+		border-right: 1px solid #DDD;
+		text-decoration: none;
+		color: #333;
+	}
+	
+	[data-menu=page] .active{
+		color: #0070CC;
+		border-top: 2px solid #0070CC;
+		border-bottom: 1px solid #FFF;
+	}
+
+
+
+	@media (max-width: 700px){ 
+		[data-role=layout]{
+			margin:0;
+		}
+		[data-role=layout] [data-option=large],[data-role=layout] [data-option=medium],[data-role=layout] [data-option=small]{
+			width: 100%;
+			margin:5px 0;
+		}
+	}
+
+
+[data-role=title]{
+	padding: 8px 0;
+    font-size: 18px;
+    line-height: 32px;
+}
+
+/* 总览页面 */
+
+[data-role=summary]{
+	display: block;
+	float: left;
+	border: 1px solid #dddddd;
+	font-size:12px;
+	margin-right:20px;
+	margin-bottom:10px;
+}
+[data-summary=title]{
+	background: #f9f9f9;
+    height: 36px;
+    line-height: 36px;
+	text-align: center;
+	padding:0 15px;
+	position: relative;
+	
+}
+[data-summary=title] span,[data-summary=title] a{
+	vertical-align: top;
+	display: inline-block;
+}
+[data-summary=title] a{
+	width: 16px;
+	height: 16px;
+	margin-top: 9px;
+}
+[data-textalign=left]{
+	text-align: left;
+}
+[data-textalign=right]{
+	text-align: right;
+}
+[data-summary=content]{
+	padding:10px 15px;
+}
+[data-align-icon=right]{
+	position: absolute;
+	right: 15px;
+	top:0;
+	width: 16px;
+	height: 16px;
+}

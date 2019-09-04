@@ -1,0 +1,46 @@
+{
+  "name": "pm2-moniter",
+  "version": "1.0.3",
+  "description": "PM2 web健康检查",
+  "main": "app.js",
+  "dependencies": {
+    "auth-smtp": "^1.0.4",
+    "bcklib": "^3.0.1",
+    "debug": "^2.6.3",
+    "ejs": "^2.6.1",
+    "https-sync": "^1.1.2",
+    "koa": "^2.2.0",
+    "koa-bodyparser": "^3.2.0",
+    "koa-convert": "^1.2.0",
+    "koa-ejs": "^4.2.0",
+    "koa-json": "^2.0.2",
+    "koa-logger": "^2.0.1",
+    "koa-mvcrouter": "^2.0.1",
+    "koa-onerror": "^4.1.0",
+    "koa-router": "^7.1.1",
+    "koa-static": "^3.0.0",
+    "koa-useragent": "^1.2.0",
+    "koa-views": "^5.2.1",
+    "moment": "^2.24.0",
+    "pm2": "^3.5.1",
+    "pmx": "beta"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zyyou/pm2-modules"
+  },
+  "config": {
+    "port": 5000
+  },
+  "apps": [
+    {
+      "autorestart": true,
+      "exec_mode": "fork",
+      "merge_logs": true,
+      "max_memory_restart": "1G",
+      "script": "app.js"
+    }
+  ],
+  "author": "zyy",
+  "license": "MIT"
+}

@@ -1,0 +1,225 @@
+<link rel="stylesheet" href="../../css/main.css" />
+<link rel="stylesheet" href="../../css/moniterLayout.css" />
+<script src="../../js/jquery-1.8.3.min.js"></script>
+<script src="../../js/echarts.min.js"></script>
+<script src="../../js/moniter.js"></script>
+
+<div class="block header-title">
+    <!-- 系统信息 -->
+    <div class="content">
+        <p id="hostname"><%=  %></p>
+        <p>启动自 <span id="uptime"></span> </p>
+    </div>
+</div>
+
+
+<div class="block">
+    <div class="content tabToggle">
+        <div data-menu="page" onclick="tabToggle(event)">
+            <a data-page="item">内存和CPU</a>
+            <a data-page="item">lo0</a>
+            <a data-page="item">en0</a>
+            <a data-page="item">awdl0</a>
+            <a data-page="item">utun0</a>
+            <a data-page="item">utun1</a>
+        </div>
+        <div data-menu="tabcon">
+            <div class="tabcon-item">
+                <div class="block layout">
+                    <div class="left-block">
+                        <h4>monit</h4>
+                        <div class="content" id="dashboard">
+
+                        </div>
+                    </div>
+                    <div class="main-block">
+                        <h4 algin="center">cpu</h4>
+                        <div class="content piechart" id="cpu">
+                        </div>
+                        <div id="cpu-pie"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="block">
+    <h4>processes</h4>
+    <div class="content">
+        <form data-role="grid">
+            <table id="processes">
+                <thead>
+                    <tr>
+                        <td>进程ID</td>
+                        <td>PM2ID</td>
+                        <td>应用</td>
+                        <td>端口</td>
+                        <td>版本</td>
+                        <td>内存</td>
+                        <td>CPU</td>
+                        <td>状态</td>
+                        <td>启动模式</td>
+                        <td>启动自</td>
+                        <td>重启次数</td>
+                        <td>用户</td>
+                        <td>更新重启</td>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+    $(function () {
+        getData();
+        setInterval("getData('isInit')", 2000);
+        $(".tabToggle [data-menu='page'] a:first").click();
+    });
+
+    function getData(isInit) {
+        $.getJSON('./data', function (data, status, xhr) {
+            var monit = data.data.monit;
+            var processes = data.data.processes;
+            var interfaces = monit.interfaces;
+            var cpu = monit.cpu;
+            //系统信息
+            $("#hostname").text(data.data.system_info.hostname);
+            $("#uptime").text(data.data.system_info.uptimeStr + "  [" + data.data.system_info.uptimeFromNow + "]");
+
+            //生成processesList
+            processesList(processes);
+            //生成processesList
+            interfacesList(interfaces,isInit);
+            //生成cpuEach
+            cpuChart(cpu,isInit);
+            //仪表盘
+            dashboard(monit,isInit);
+        });
+    }
+        //仪表盘
+    function dashboard(mem,isInit) {
+        //仪表盘图表
+        var freeNum = mem.free_mem;   //仪表盘freeMemStr
+        var useMem = mem.total_mem - mem.free_mem;  //已用内存
+        var totalNum = mem.total_mem; //仪表盘total;
+        //var dashboardVal = (1 - [freeNum / totalNum]) * 100;
+        var dashboardVal = (useMem / totalNum) * 100;
+        var name = '空闲' + mem.freeMemStr
+        var dashboardData = [{ value: dashboardVal.toFixed(2)}];
+        dashboardChart('dashboard',dashboardData,name,isInit)
+           
+    }
+
+    function buildProcTd(val) {
+        return "<td>" + val + "</td>";
+    }
+
+    //processesList
+    function processesList(obj) {
+        var td = $("#processes thead td");
+        $("#processes tbody tr").remove();
+        $.each(obj, function (index, item) {
+            var tdbox = buildProcTd(item.pid) +
+                buildProcTd(item.pm_id) +
+                buildProcTd(item.name) +
+                buildProcTd(item.port) +
+                buildProcTd(item.pm2_env.version) +
+                buildProcTd(item.memoryStr) +
+                buildProcTd(item.monit.cpu) +
+                buildProcTd(item.pm2_env.status) +
+                buildProcTd(item.pm2_env.exec_mode) +
+                buildProcTd(item.uptimeStr + "[" + item.uptimeFromNow + "]") +
+                buildProcTd(item.pm2_env.restart_time) +
+                buildProcTd(item.pm2_env.username) +
+                buildProcTd(item.pm2_env.watch);
+            $("#processes tbody").append("<tr>" + tdbox + "</tr>");
+        })
+    }
+    //interfacesList
+    function interfacesList(obj) {
+        $.each(obj, function (index, item) {
+            //生成table标题
+            var divbox = $("<div class='tabcon-item'></div>");
+            var formbox = $("<form></form >").attr("data-role", "grid");
+            var table = $("<table></table>");
+            var thead = $("<thead></thead>");
+            var tbody = $("<tbody></tbody>");
+            var theadTr = $("<tr></tr>");
+            var address = $("<td></td>").text("address");
+            var netmask = $("<td></td>").text("netmask");
+            var family = $("<td></td>").text("family");
+            var mac = $("<td></td>").text("mac");
+            var internal = $("<td></td>").text("internal");
+            var cidr = $("<td></td>").text("cidr");
+            theadTr.append(address, netmask, family, mac, internal, cidr);
+            thead.append(theadTr);
+            $('[data-menu=tabcon]').append(divbox);
+
+            var trbox = $("<tr></tr>");
+            $.each(item, function (key, value) {
+                var trbox = $("<tr></tr>");
+                var address = $("<td></td>").text(value.address);
+                var netmask = $("<td></td>").text(value.netmask);
+                var family = $("<td></td>").text(value.family);
+                var mac = $("<td></td>").text(value.mac);
+                var internal = $("<td></td>").text(value.internal);
+                var cidr = $("<td></td>").text(value.cidr);
+                trbox.append(address, netmask, family, mac, internal, cidr);
+                tbody.append(trbox)
+            })
+
+            table.append(thead, tbody);
+            formbox.append(table);
+            divbox.append(formbox);
+        })
+    }
+    //cpuChart
+    function cpuChart(cpu,isInit) {
+        var title = new Array();
+        var user = [];
+        var sys = [];
+        var idle = [];
+        $.each(cpu, function (index, item) {
+            //title.push(item.model);
+            title.push('core ' + index);
+            var total = 0;
+            for (key in item.times) {
+                total += item.times[key];
+            }
+            //单位换算
+            $.each(item.times, function (key, value) {
+                item.times[key] = Math.round(100 * value / total);
+            })
+            //整合数据
+            user.push(item.times.user);
+            sys.push(item.times.sys);
+            idle.push(item.times.idle);
+        })
+        var cpuData = [{ name: '系统', type: 'bar', stack: 'cpu', data: sys },
+        { name: '空闲', type: 'bar', stack: 'cpu', data: idle },
+        { name: '用户', type: 'bar', barWidth: 15, stack: 'cpu', data: user }]
+        histogram("cpu", title, cpuData,isInit);
+
+        //饼状图
+        var userSum = 0;
+        var sysSum = 0;
+        var idleSum = 0;
+        for (key in user) {
+            userSum += user[key];
+        }
+        for (key in sys) {
+            sysSum += sys[key];
+        }
+        for (key in idle) {
+            idleSum += idle[key];
+        }
+        var picTotal = userSum + sysSum + idleSum;
+        var picTitle = ["用户", "系统", "空闲"];
+        var picData = [{ value: Math.round(100 * userSum / picTotal), name: '总用户' },
+        { value: Math.round(100 * sysSum / picTotal), name: '总系统' },
+        { value: Math.round(100 * idleSum / picTotal), name: '总空闲' }];
+        pieChart("cpu-pie", picTitle, picData,isInit)
+    }
+</script>

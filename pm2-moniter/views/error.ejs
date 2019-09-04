@@ -1,0 +1,51 @@
+
+  <style>
+    .weui-icon_msg{
+      display: block;
+      text-align: center;
+      margin-bottom:20px;
+      margin-top:30px;
+      font-size:4rem;
+    }
+    .weui-btn{
+      margin-top:30px;
+    }
+    #errmsg{
+      padding:10px 2rem;
+      text-align: center;
+      color:#666;
+      word-break: break-all;
+      line-height: 1rem;
+    }
+  </style>
+
+
+ <div id="errmsg"> 
+    <i class="weui-icon-warn weui-icon_msg"></i>
+    <%= message %>
+    <!-- <a href="javascript:window.history.back();" class="weui-btn weui-btn_primary">返回</a> -->
+    <a class="weui-btn weui-btn_primary" onclick='<%=goBack %>'>返回</a> 
+   
+</div>
+
+<script>
+  $(function(){
+    var goBackAtt = $(".weui-btn").attr("onclick");
+    console.log(goBackAtt);
+    
+    if(goBackAtt =="goBackCallApp()"){ 
+      $(".header-box-left").attr("onclick",'goBackCallApp()');
+      $$(".weui-btn").attr("onclick",'goBackCallApp()');
+      goUrl("0","");
+    }else{
+      $(".header-box-left").attr("onclick",goBackAtt);
+      var regex=/\"(.+?)\"/g;
+      var newUrl = new String();
+      while((result=regex.exec(goBackAtt))!=null) {
+        newUrl+=result[1]+",";
+    }
+      var src=newUrl.split(",");
+      goUrl(src[0],src[1]);
+    }
+  })
+</script>

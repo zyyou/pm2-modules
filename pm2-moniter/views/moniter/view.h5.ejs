@@ -1,0 +1,260 @@
+<link rel="stylesheet" href="../../css/main.css" />
+<link rel="stylesheet" href="../../css/moniterLayout.h5.css" />
+<script src="../../js/jquery-1.8.3.min.js"></script>
+<script src="../../js/echarts.min.js"></script>
+<script src="../../js/moniter.js"></script>
+<div class="block header-title">
+    <!-- 系统信息 -->
+    <div class="content">
+        <p id="hostname"><%=  %></p>
+        <p>启动自 <span id="uptime"></span> </p>
+    </div>
+</div>
+
+
+<div class="block">
+    <div class="content tabToggle">
+        <div data-menu="page" onclick="tabToggle(event)">
+            <a data-page="item">monit和CPU</a>
+            <a data-page="item">processes</a>
+            <a data-page="item">interfaces</a>
+        </div>
+        <div data-menu="tabcon">
+            <div class="tabcon-item">
+                <div class="block">
+                    <h4>monit</h4>
+                    <div class="content" id="dashboard">
+
+                    </div>
+                </div>
+                <div class="block">
+                    <h4 algin="center">cpu</h4>
+                    <div class="content piechart" id="cpu">
+                    </div>
+                    <div id="cpu-pie"></div>
+                </div>
+            </div>
+            <div class="tabcon-item">
+                <div class="processesTab">
+                    <div class="processes-title" onclick="processesTab(event)">
+                       
+                    </div>
+                    <div class="processes-con">
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="tabcon-item" id="interfacesList">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(function () {
+        setInterval("getData()",2000);
+        //tab切换第一个选中
+        $(".tabToggle [data-menu='page'] a:first").click();
+    });
+    function getData(){
+        $.getJSON('./data', function (data, status, xhr) {
+            var monit =data.data.monit;
+            var processes =data.data.processes;
+            var interfaces =monit.interfaces;
+            var cpu =monit.cpu;
+            //系统信息
+            $("#hostname").text(data.data.system_info.hostname);
+            $("#uptime").text(data.data.system_info.uptimeStr+"  ["+ data.data.system_info.uptimeFromNow+"]");
+            
+            //生成processesList
+            processesList(processes);
+            //interfacesList
+            interfacesList(interfaces);
+            //生成cpuEach
+            cpuChart(cpu);
+            //仪表盘
+            dashboard(monit);
+        });
+    }
+    //processesList
+    function processesList(obj){
+        $(".processes-title a").remove();
+        $.each(obj,function(index,item){
+            //title
+            var title = $("<a> </a>").text(item.name);
+            $(".processes-title").append(title);
+
+            //内容
+            var div1 =$("<div></div>").addClass("processes-item");
+            for(var i =0;i<12;i++){
+                var list1 =$("<div></div>").addClass("listbox");
+                var pbox1 =$("<p></p>").addClass("listbox-title");
+                var pbox2 =$("<p></p>").addClass("listbox-con");
+                list1.append(pbox1,pbox2);
+                div1.append(list1);
+                switch(i) {
+                    case 0:
+                        pbox1.text("进程ID");
+                        pbox2.text(item.pid);
+                        break;
+                    case 1:
+                        pbox1.text("PM2ID");
+                        pbox2.text(item.pm_id);
+                        break;
+                    case 2:
+                        pbox1.text("应用");
+                        pbox2.text(item.name);
+                        break;
+                    case 3:
+                        pbox1.text("版本");
+                        pbox2.text(item.pm2_env.version);
+                        break;
+                    case 4:
+                        pbox1.text("内存");
+                        pbox2.text(item.memoryStr);
+                        break;
+                    case 5:
+                        pbox1.text("CPU");
+                        pbox2.text(item.monit.cpu);
+                        break;
+                    case 6:
+                        pbox1.text("状态");
+                        pbox2.text(item.pm2_env.status);
+                        break;
+                    case 7:
+                        pbox1.text("启动模式");
+                        pbox2.text(item.pm2_env.exec_mode);
+                        break;
+                    case 8:
+                        pbox1.text("启动自");
+                        pbox2.text(item.uptimeStr +"["+item.uptimeFromNow+"]");
+                        break;
+                    case 9:
+                        pbox1.text("重启次数");
+                        pbox2.text(item.pm2_env.restart_time);
+                        break;
+                    case 10:
+                        pbox1.text("用户");
+                        pbox2.text(item.pm2_env.username);
+                        break;
+                    case 11:
+                        pbox1.text("更新重启");
+                        pbox2.text(item.pm2_env.watch);
+                        break;
+                } 
+            }
+            $(".processes-con").append(div1);
+            
+
+        })
+        $(".processes-title a:first").click();
+    }
+    function interfacesList(obj){
+        
+        var blockbox =$("<div></div>").addClass("block");
+        $.each(obj,function(index,item){
+            var title =$("<h4></h4>").text(index);
+            blockbox.append(title);
+            var listbox =$("<div></div>").addClass("interfaces-listbox");
+            $.each(item,function(key,value){
+                var listItem =$("<div></div>").addClass("interfaces-item");
+                for(var i =0;i<5;i++){
+                    var list1 =$("<div></div>").addClass("listbox");
+                    var pbox1 =$("<p></p>").addClass("listbox-title");
+                    var pbox2 =$("<p></p>").addClass("listbox-con");
+                    list1.append(pbox1,pbox2);
+                    listItem.append(list1);
+                    switch(i) {
+                        case 0:
+                            pbox1.text("address");
+                            pbox2.text(value.address);
+                            break;
+                        case 1:
+                            pbox1.text("netmask");
+                            pbox2.text(value.netmask);
+                            break;
+                        case 2:
+                            pbox1.text("family");
+                            pbox2.text(value.family);
+                            break;
+                        case 3:
+                            pbox1.text("mac");
+                            pbox2.text(value.mac);
+                            break;
+                        case 4:
+                            pbox1.text("internal");
+                            pbox2.text(value.internal);
+                            break;
+                        case 5:
+                            pbox1.text("cidr");
+                            pbox2.text(item.cidr);
+                            break;
+                    }
+                }   
+                listbox.append(listItem)
+            })
+            
+            blockbox.append(listbox);
+        })
+        $("#interfacesList").append(blockbox);
+    };
+    //仪表盘
+    function dashboard(obj){
+        //仪表盘图表
+        var freeMemStr = obj.freeMemStr;//仪表盘freeMemStr
+        var totalMemStr = obj.totalMemStr;//仪表盘total;
+        var freeNum = parseFloat(freeMemStr);
+        var totalNum = parseFloat(totalMemStr);
+        var dashboardVal = (1 - [freeNum / totalNum]) * 100;
+        var dashboardData = [{ value: dashboardVal.toFixed(2), name: '内存已用', freeNum: freeNum }];
+        dashboardChart("dashboard", dashboardData);
+    }
+    //cpuChart
+    function cpuChart(obj){
+        var cpu =JSON.parse(obj);
+        var title =new Array();
+        var user=[];
+        var sys =[];
+        var idle =[];
+        $.each(cpu,function(index,item){
+            title.push(item.model);
+            var total=0;
+            for(key in item.times){
+                total +=item.times[key];
+            }
+            //单位换算
+            $.each(item.times,function(key,value){
+                item.times[key]=Math.round(100 * value / total);
+            })
+            //整合数据
+            user.push(item.times.user);
+            sys.push(item.times.sys);
+            idle.push(item.times.idle);
+        })
+        var cpuData =[{name:'sys',type:'bar',stack: 'cpu',data:sys},
+                    {name:'idle',type:'bar',stack: 'cpu',data:idle},
+                    {name:'user',type:'bar',barWidth : 15,stack: 'cpu',data:user}]
+        histogram("cpu",title,cpuData);
+        
+        //饼状图
+        var userSum=0;
+        var sysSum=0;
+        var idleSum=0;
+        for(key in user){
+            userSum +=user[key];
+        }
+        for(key in sys){
+            sysSum +=sys[key];
+        }
+        for(key in idle){
+            idleSum +=idle[key];
+        }
+        var picTotal = userSum+sysSum+idleSum;
+        var picTitle =["user","sys","idle"];
+        var picData =[{value:Math.round(100 * userSum/ picTotal), name:'userSum'},
+                    {value:Math.round(100 * sysSum/ picTotal), name:'sysSum'},
+                    {value:Math.round(100 * idleSum/ picTotal), name:'idleSum'}];
+        pieChart("cpu-pie",picTitle, picData)
+    }
+</script>

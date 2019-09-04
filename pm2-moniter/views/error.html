@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Error - {{status}}</title>
+    <link rel="stylesheet" href="/css/weui.1.0.css">
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <style>
+      body {
+        padding: 50px 1.5rem;
+        font: 14px "Helvetica Neue", Helvetica, sans-serif;
+        box-sizing: border-box;
+        color:#666;
+      }
+
+      h1 {
+        font-size: 2em;
+        margin-bottom: 5px;
+      }
+
+      p {
+        font-size: .8em;
+        word-break: break-all;
+        line-height: 1rem;
+        
+      }
+      .weui-icon_msg{
+        display: block;
+        text-align: center;
+        margin-bottom:20px;
+        margin-top:30px;
+        font-size:4rem;
+      }
+      .weui-btn{
+        margin-top:30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="error">
+      <i class="weui-icon-warn weui-icon_msg"></i>
+      <h1>{{message}}</h1>
+      <p>{{stack}}</p>
+      <a href="javascript:window.history.back();" class="weui-btn weui-btn_primary">返回</a>
+    </div>
+
+  </body>
+</html>

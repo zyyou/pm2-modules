@@ -1,0 +1,114 @@
+<style>
+    div.content {
+        padding: 10px 20px;
+        margin-bottom: 10px;
+    }
+
+    table#processes td {
+        width: 150px;
+    }
+</style>
+
+系统信息：
+<div class="content">
+    主机名：<%= system_info.hostname %><br />
+    启动时间：<%= system_info.uptimeStr %> 【<%= system_info.uptimeFromNow %>】
+</div>
+
+monit
+<div class="content">
+    <% for(key in monit){ %>
+    <%= key %>：<%= monit[key] %><br />
+    <%} %>
+</div>
+
+cpu
+<table id="cpu" border="1">
+    <tr>
+        <th>model</th>
+        <th>speed</th>
+        <th>tm_user</th>
+        <th>tm_nice</th>
+        <th>tm_sys</th>
+        <th>tm_idle</th>
+        <th>tm_irq</th>
+    </tr>
+    <% for(key in monit.cpu){ %>
+    <tr>
+        <td><%= monit.cpu[key].model %></td>
+        <td><%= monit.cpu[key].speed %></td>
+        <td><%= monit.cpu[key].times.user %></td>
+        <td><%= monit.cpu[key].times.nice %></td>
+        <td><%= monit.cpu[key].times.sys %></td>
+        <td><%= monit.cpu[key].times.idle %></td>
+        <td><%= monit.cpu[key].times.irq %></td>
+    </tr>
+    <%} %>
+</table>
+<br />
+<br />
+
+interfaces
+<br />
+<% for(key in monit.interfaces){ %>
+<%= key %>
+<table id="cpu" border="1">
+    <tr>
+        <th>address</th>
+        <th>netmask</th>
+        <th>family</th>
+        <th>mac</th>
+        <th>internal</th>
+        <th>cidr</th>
+    </tr>
+    <% for(i in monit.interfaces[key]){ %>
+    <tr>
+        <td><%= monit.interfaces[key][i].address %></td>
+        <td><%= monit.interfaces[key][i].netmask %></td>
+        <td><%= monit.interfaces[key][i].family %></td>
+        <td><%= monit.interfaces[key][i].mac %></td>
+        <td><%= monit.interfaces[key][i].internal %></td>
+        <td><%= monit.interfaces[key][i].cidr %></td>
+    </tr>
+    <%} %>
+</table>
+<br />
+<%} %>
+<br />
+
+
+processes
+<table id="processes" border="1">
+    <tr>
+        <th>进程ID</th>
+        <th>PM2ID</th>
+        <th>应用</th>
+        <th>版本</th>
+        <th>内存</th>
+        <th>CPU</th>
+        <th>状态</th>
+        <th>启动模式</th>
+        <th>启动自</th>
+        <th>重启次数</th>
+        <th>用户</th>
+        <th>更新重启</th>
+        <th>pm2_env</th>
+    </tr>
+    <% for(key in processes){ %>
+    <tr>
+        <td><%= processes[key].pid %></td>
+        <td><%= processes[key].pm_id %></td>
+        <td><%= processes[key].name %></td>
+        <td><%= processes[key].pm2_env.version %></td>
+        <td><%= processes[key].memoryStr %></td>
+        <td><%= processes[key].monit.cpu %>%</td>
+        <td><%= processes[key].pm2_env.status %></td>
+        <td><%= processes[key].pm2_env.exec_mode %></td>
+        <td><%= processes[key].uptimeStr %>【<%= processes[key].uptimeFromNow %>】</td>
+        <td><%= processes[key].pm2_env.restart_time %></td>
+        <td><%= processes[key].pm2_env.username %></td>
+        <td><%= processes[key].pm2_env.watch %></td>
+        <td><%= processes[key].pm2_env %></td>
+    </tr>
+    <%} %>
+</table>
