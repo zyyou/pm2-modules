@@ -1,6 +1,6 @@
 {
   "name": "pm2-moniter",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "PM2 web健康检查",
   "main": "app.js",
   "dependencies": {

@@ -31,7 +31,15 @@ async function getPidPort(pid) {
       return '';
   }
 
-  let res = await processExec(cmd);
+  let res;
+  try {
+    res = await processExec(cmd);
+  } catch (e) {
+    //console.error('无法获取进程端口', pid, e);
+  }
+  if (!res) {
+    return '';
+  }
   let outArr = res.stdout.split('\n');
   let parr = outArr[0].split(' ');
   parr = parr.filter((val) => {
